@@ -15,6 +15,11 @@ BRUSH_THICKNESS = 8
 ACTION_COOLDOWN_SECONDS = 1.0
 WINDOW_NAME = "Air Sketch Studio"
 TOOLBAR_HEIGHT = 112
+CAMERA_INDEX = 0
+CAMERA_WIDTH = 1280
+CAMERA_HEIGHT = 720
+CAMERA_FPS = 30
+CAMERA_READ_RETRIES = 30
 Color = Tuple[int, int, int]
 Rect = Tuple[int, int, int, int]
 
@@ -118,12 +123,28 @@ def draw_corner_box(
     return min_x, min_y, max_x, max_y
 
 
+def open_camera() -> cv2.VideoCapture:
+    """Open a responsive Windows webcam, preferring DirectShow."""
+    backends = (cv2.CAP_DSHOW, cv2.CAP_ANY) if os.name == "nt" else (cv2.CAP_ANY,)
+    for backend in backends:
+        camera = cv2.VideoCapture(CAMERA_INDEX, backend)
+        if not camera.isOpened():
+            camera.release()
+            continue
+        camera.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
+        camera.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+        camera.set(cv2.CAP_PROP_FPS, CAMERA_FPS)
+        camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        return camera
+    raise RuntimeError(
+        "Could not open a webcam. Close other camera apps and check Windows camera permissions."
+    )
+
+
 def main() -> None:
     """Run the real-time Air Sketch Studio webcam application."""
     os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
-    camera = cv2.VideoCapture(0)
-    if not camera.isOpened():
-        raise RuntimeError("Could not open webcam. Check camera permissions and index 0.")
+    camera = open_camera()
 
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
     cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
@@ -160,11 +181,18 @@ def main() -> None:
             canvas[:] = history[index]
             history_index = index
 
+    failed_reads = 0
     try:
         while True:
             success, frame = camera.read()
-            if not success:
-                break
+            if not success or frame is None:
+                failed_reads += 1
+                if failed_reads < CAMERA_READ_RETRIES:
+                    continue
+                raise RuntimeError(
+                    "The webcam opened but returned no frames. Check camera permissions, privacy covers, and other camera apps."
+                )
+            failed_reads = 0
 
             frame = cv2.flip(frame, 1)
             height, width = frame.shape[:2]

@@ -17,7 +17,7 @@ Air Sketch Studio is a real-time computer-vision drawing application. Use hand g
    python main.py
    ```
 
-The webcam and the included `assets/hand_landmarker.task` model are required. Press `Q` to quit.
+The webcam and the included `assets/hand_landmarker.task` model are required. The app requests a 1280x720, 30 FPS stream with a one-frame buffer for low-latency gesture tracking. Press `Q` to quit.
 
 ## Gestures
 
