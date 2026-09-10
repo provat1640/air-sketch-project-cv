@@ -1,6 +1,6 @@
 # Air Sketch Studio
 
-Air Sketch Studio is a real-time computer-vision drawing application. Use hand gestures in front of a webcam to draw, change brush colors, save sketches, clear the canvas, and crop selected areas.
+Air Sketch Studio is a real-time computer-vision drawing application. Use hand gestures in front of a webcam to draw, change brush colors, choose brush sizes, erase, undo, redo, save sketches, clear the canvas, and crop selected areas.
 
 ## Setup
 
@@ -21,9 +21,21 @@ The webcam and the included `assets/hand_landmarker.task` model are required. Pr
 
 ## Gestures
 
+### Finger-grid toolbar
+
+The toolbar is displayed across the top of the camera view. Move the left index fingertip over a cell and pinch with the left thumb to select it.
+
+- Color cells: blue, green, red, or yellow
+- `ERASER`: draw with black to remove marks
+- `THIN`, `MED`, `THICK`: change brush size
+- `UNDO`, `REDO`, `SAVE`, `CLEAR`: manage the current sketch
+
+### Gestures
+
 - Right index finger: draw
 - Right thumb up: save the sketch
 - Right open palm: clear the canvas
-- Left hand with 1-4 fingers: choose blue, green, red, or yellow
+- Right index and middle fingers: undo
+- Left hand with 1-4 fingers: quick-select blue, green, red, or yellow
 - Both index fingers: select a crop rectangle
 - Both thumbs and index fingers: save the selected crop
